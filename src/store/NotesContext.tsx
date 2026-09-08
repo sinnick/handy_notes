@@ -33,8 +33,19 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function isNoteColor(value: unknown): value is NoteColor {
-  return typeof value === 'string' && (NOTE_COLORS as readonly string[]).includes(value);
+/** Colours from the first palette map onto the nearest tone in the current one. */
+const LEGACY_COLORS: Record<string, NoteColor> = {
+  butter: 'sand',
+  peach: 'sand',
+  mint: 'sky',
+  lilac: 'glacier',
+  rose: 'glacier',
+};
+
+function toNoteColor(value: unknown): NoteColor {
+  if (typeof value !== 'string') return 'paper';
+  if ((NOTE_COLORS as readonly string[]).includes(value)) return value as NoteColor;
+  return LEGACY_COLORS[value] ?? 'paper';
 }
 
 /** Defensive parse: never let a bad payload wipe the app on launch. */
@@ -50,7 +61,7 @@ function parseNotes(raw: string | null): Note[] {
           id: n.id,
           title: typeof n.title === 'string' ? n.title : '',
           body: typeof n.body === 'string' ? n.body : '',
-          color: isNoteColor(n.color) ? n.color : 'paper',
+          color: toNoteColor(n.color),
           pinned: Boolean(n.pinned),
           createdAt: typeof n.createdAt === 'number' ? n.createdAt : Date.now(),
           updatedAt: typeof n.updatedAt === 'number' ? n.updatedAt : Date.now(),
@@ -69,7 +80,7 @@ function welcomeNote(): Note {
     title: 'How this works',
     body:
       'Keep the few things you look up every day: the wifi password, your plate number, the address you keep spelling out.\n\nTap a note to edit it.\nHold a note to pin or unpin it.\nPick a colour from inside the editor.',
-    color: 'butter',
+    color: 'sand',
     pinned: true,
     createdAt: now,
     updatedAt: now,

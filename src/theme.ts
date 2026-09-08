@@ -3,8 +3,9 @@ import { useColorScheme } from 'react-native';
 /**
  * Design tokens for Handy Notes.
  *
- * Every colour, size, space and radius in the app comes from here.
- * Spacing is a 4px grid. Radii live in the 8–24px range.
+ * Palette: Midnight Ocean, Deep Indigo, Health Blue, Cool Glacier, White,
+ * Warm Stone and Light Sand. Every colour, size, space and radius in the app
+ * comes from here. Spacing is a 4px grid. Radii live in the 8–24px range.
  */
 
 export const space = {
@@ -26,10 +27,10 @@ export const radius = {
 } as const;
 
 export const fonts = {
-  sans: 'Geist_400Regular',
-  sansMedium: 'Geist_500Medium',
-  mono: 'GeistMono_400Regular',
-  monoMedium: 'GeistMono_500Medium',
+  sans: 'Rubik_400Regular',
+  sansMedium: 'Rubik_500Medium',
+  mono: 'DMMono_400Regular',
+  monoMedium: 'DMMono_500Medium',
 } as const;
 
 export const type = {
@@ -42,60 +43,119 @@ export const type = {
   meta: { fontFamily: fonts.mono, fontSize: 12, lineHeight: 16, letterSpacing: 0.6 },
 } as const;
 
-/** The seven paper colours a note can wear. Order is the order shown in the picker. */
-export const NOTE_COLORS = ['paper', 'butter', 'peach', 'mint', 'sky', 'lilac', 'rose'] as const;
+/** Brand swatches, as named in the palette. */
+export const brand = {
+  midnightOcean: '#020B0C',
+  deepIndigo: '#18245A',
+  healthBlue: '#0069C4',
+  royalBlue: '#003EA5',
+  coolGlacier: '#54A6EF',
+  glacierTint: '#7CB8F4',
+  glacierPale: '#A0CAF0',
+  white: '#FFFFFF',
+  warmStone: '#F6F5F1',
+  lightSand: '#F7F3EA',
+} as const;
+
+/** The seven tones a note can wear. Order is the order shown in the picker. */
+export const NOTE_COLORS = ['paper', 'sand', 'sky', 'glacier', 'blue', 'indigo', 'midnight'] as const;
 export type NoteColor = (typeof NOTE_COLORS)[number];
 
-export const noteColors: Record<NoteColor, { label: string; light: string; dark: string }> = {
-  paper: { label: 'Paper', light: '#FCFAF6', dark: '#26241F' },
-  butter: { label: 'Butter', light: '#FBECB2', dark: '#3F3717' },
-  peach: { label: 'Peach', light: '#F9D5C2', dark: '#432B1F' },
-  mint: { label: 'Mint', light: '#D2EBD9', dark: '#1E3628' },
-  sky: { label: 'Sky', light: '#D3E4F8', dark: '#1F2E44' },
-  lilac: { label: 'Lilac', light: '#E4DAF6', dark: '#302844' },
-  rose: { label: 'Rose', light: '#F8D6E0', dark: '#422632' },
+/** Everything needed to draw text and chrome on top of a note's background. */
+export type NoteTone = {
+  bg: string;
+  fg: string;
+  fgSecondary: string;
+  fgMuted: string;
+  hairline: string;
+  danger: string;
+  /** Translucent wash used behind the editor footer and pressed icon buttons. */
+  overlay: string;
 };
 
-const light = {
-  bg: '#F5F1EA',
-  surface: '#FCFAF6',
-  hairline: '#E4DED3',
-  hairlineOnNote: 'rgba(20, 20, 20, 0.10)',
-  text: '#141414',
-  textSecondary: 'rgba(20, 20, 20, 0.72)',
-  textMuted: '#6A645A',
-  accent: '#2E62D9',
-  accentSoft: '#DCE6FA',
+const onLight = (bg: string, fgMuted = '#5A6472'): NoteTone => ({
+  bg,
+  fg: brand.midnightOcean,
+  fgSecondary: 'rgba(2, 11, 12, 0.72)',
+  fgMuted,
+  hairline: 'rgba(2, 11, 12, 0.10)',
+  danger: '#C4453C',
+  overlay: 'rgba(2, 11, 12, 0.06)',
+});
+
+const onDark = (bg: string, fgMuted = 'rgba(255, 255, 255, 0.72)'): NoteTone => ({
+  bg,
+  fg: brand.white,
+  fgSecondary: 'rgba(255, 255, 255, 0.86)',
+  fgMuted,
+  hairline: 'rgba(255, 255, 255, 0.14)',
+  danger: '#FF9C93',
+  overlay: 'rgba(255, 255, 255, 0.10)',
+});
+
+export const noteColors: Record<NoteColor, { label: string; light: NoteTone; dark: NoteTone }> = {
+  paper: { label: 'Paper', light: onLight(brand.white), dark: onDark('#0E1822') },
+  sand: { label: 'Sand', light: onLight('#EFE7D6'), dark: onDark('#1E1A12') },
+  sky: { label: 'Sky', light: onLight('#D7E8FA', '#425060'), dark: onDark('#0D2540') },
+  glacier: { label: 'Glacier', light: onLight(brand.glacierPale, '#3B4756'), dark: onDark('#14406B') },
+  blue: { label: 'Blue', light: onDark(brand.healthBlue, 'rgba(255, 255, 255, 0.86)'), dark: onDark('#0B5FB3', 'rgba(255, 255, 255, 0.86)') },
+  indigo: { label: 'Indigo', light: onDark(brand.deepIndigo), dark: onDark(brand.deepIndigo) },
+  midnight: { label: 'Midnight', light: onDark(brand.midnightOcean), dark: onDark('#07161C') },
+};
+
+export type Colors = {
+  bg: string;
+  surface: string;
+  hairline: string;
+  text: string;
+  textSecondary: string;
+  textMuted: string;
+  accent: string;
+  accentSoft: string;
+  danger: string;
+  dangerSoft: string;
+  pressOverlay: string;
+  inverse: string;
+  onInverse: string;
+};
+
+const light: Colors = {
+  bg: brand.lightSand,
+  surface: brand.white,
+  hairline: '#E3DDD0',
+  text: brand.midnightOcean,
+  textSecondary: 'rgba(2, 11, 12, 0.72)',
+  textMuted: '#5A6472',
+  accent: brand.healthBlue,
+  accentSoft: '#DCEBFA',
   danger: '#C4453C',
   dangerSoft: '#F8DAD6',
-  pressOverlay: 'rgba(20, 20, 20, 0.06)',
-  inverse: '#141414',
-  onInverse: '#F5F1EA',
+  pressOverlay: 'rgba(2, 11, 12, 0.06)',
+  inverse: brand.deepIndigo,
+  onInverse: brand.white,
 };
 
-const dark: typeof light = {
-  bg: '#141414',
-  surface: '#1E1D1B',
-  hairline: '#2E2C29',
-  hairlineOnNote: 'rgba(255, 255, 255, 0.10)',
-  text: '#F3EFE8',
-  textSecondary: 'rgba(243, 239, 232, 0.76)',
-  textMuted: '#A39D92',
-  accent: '#7B9FF2',
-  accentSoft: '#1F2C4A',
-  danger: '#E8776E',
-  dangerSoft: '#40211E',
+const dark: Colors = {
+  bg: brand.midnightOcean,
+  surface: '#0E1822',
+  hairline: '#1C2837',
+  text: brand.warmStone,
+  textSecondary: 'rgba(246, 245, 241, 0.76)',
+  textMuted: '#9AA6B5',
+  accent: brand.coolGlacier,
+  accentSoft: '#0D2540',
+  danger: '#F08A80',
+  dangerSoft: '#3A1F1C',
   pressOverlay: 'rgba(255, 255, 255, 0.08)',
-  inverse: '#F3EFE8',
-  onInverse: '#141414',
+  inverse: brand.glacierTint,
+  onInverse: brand.midnightOcean,
 };
 
-export type Colors = typeof light;
 export type Scheme = 'light' | 'dark';
 
 export function useTheme() {
   const scheme: Scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = scheme === 'dark' ? dark : light;
-  const noteBg = (c: NoteColor) => noteColors[c][scheme];
-  return { scheme, isDark: scheme === 'dark', colors, noteBg };
+  const noteTone = (c: NoteColor): NoteTone => noteColors[c][scheme];
+  return { scheme, isDark: scheme === 'dark', colors, noteTone };
 }

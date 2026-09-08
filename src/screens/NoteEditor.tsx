@@ -56,7 +56,7 @@ function confirmDelete(onConfirm: () => void) {
 }
 
 function EditorBody({ noteId, isNew, onClose }: { noteId: string; isNew: boolean; onClose: () => void }) {
-  const { colors, noteBg, isDark } = useTheme();
+  const { noteTone } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { getNote, updateNote, setColor, togglePin, deleteNote } = useNotes();
@@ -95,29 +95,33 @@ function EditorBody({ noteId, isNew, onClose }: { noteId: string; isNew: boolean
 
   if (!note) return null;
 
-  const bg = noteBg(note.color);
+  const tone = noteTone(note.color);
   // Only the full-screen presentation (Android, web) sits under the status bar.
   const topInset = Platform.OS === 'ios' ? space.md : insets.top + space.sm;
   const horizontal = Math.max(space.lg, (width - CONTENT_MAX_WIDTH) / 2);
 
   return (
     <KeyboardAvoidingView
-      style={[styles.root, { backgroundColor: bg }]}
+      style={[styles.root, { backgroundColor: tone.bg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.toolbar, { paddingTop: topInset, paddingHorizontal: horizontal - space.sm }]}>
-        <IconButton icon={X} label="Close" onPress={handleClose} />
+        <IconButton icon={X} label="Close" onPress={handleClose} color={tone.fg} overlay={tone.overlay} />
         <View style={styles.toolbarRight}>
           <IconButton
             icon={Pin}
             label={note.pinned ? 'Unpin note' : 'Pin note'}
             active={note.pinned}
+            color={tone.fg}
+            overlay={tone.overlay}
             onPress={() => togglePin(noteId)}
           />
           <IconButton
             icon={Trash2}
             label="Delete note"
             tone="danger"
+            color={tone.danger}
+            overlay={tone.overlay}
             onPress={() =>
               confirmDelete(() => {
                 deleteNote(noteId);
@@ -138,8 +142,8 @@ function EditorBody({ noteId, isNew, onClose }: { noteId: string; isNew: boolean
           value={title}
           onChangeText={onChangeTitle}
           placeholder="Title"
-          placeholderTextColor={colors.textMuted}
-          style={[type.title, styles.input, { color: colors.text }]}
+          placeholderTextColor={tone.fgMuted}
+          style={[type.title, styles.input, { color: tone.fg }]}
           returnKeyType="next"
           submitBehavior="blurAndSubmit"
           onSubmitEditing={() => bodyRef.current?.focus()}
@@ -151,8 +155,8 @@ function EditorBody({ noteId, isNew, onClose }: { noteId: string; isNew: boolean
           value={body}
           onChangeText={onChangeBody}
           placeholder="Something you’ll need again…"
-          placeholderTextColor={colors.textMuted}
-          style={[type.body, styles.input, styles.bodyInput, { color: colors.text }]}
+          placeholderTextColor={tone.fgMuted}
+          style={[type.body, styles.input, styles.bodyInput, { color: tone.fg }]}
           multiline
           textAlignVertical="top"
           scrollEnabled={false}
@@ -166,15 +170,15 @@ function EditorBody({ noteId, isNew, onClose }: { noteId: string; isNew: boolean
           {
             paddingHorizontal: horizontal,
             paddingBottom: Math.max(insets.bottom, space.md),
-            borderTopColor: colors.hairlineOnNote,
-            backgroundColor: isDark ? 'rgba(20,20,20,0.24)' : 'rgba(255,255,255,0.32)',
+            borderTopColor: tone.hairline,
+            backgroundColor: tone.overlay,
           },
         ]}
       >
-        <Text style={[type.meta, { color: colors.textMuted }]}>
+        <Text style={[type.meta, { color: tone.fgMuted }]}>
           EDITED {formatRelativeDay(note.updatedAt)} · {formatTime(note.updatedAt)}
         </Text>
-        <ColorSwatches value={note.color} onChange={(c) => setColor(noteId, c)} />
+        <ColorSwatches value={note.color} onChange={(c) => setColor(noteId, c)} ringColor={tone.fg} />
       </View>
     </KeyboardAvoidingView>
   );
