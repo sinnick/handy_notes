@@ -1,25 +1,31 @@
-import { Plus } from 'lucide-react-native';
+import { Plus, SlidersHorizontal } from 'lucide-react-native';
 import React, { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '../components/EmptyState';
+import { IconButton } from '../components/IconButton';
 import { MasonryGrid } from '../components/MasonryGrid';
 import { SectionLabel } from '../components/SectionLabel';
 import { useNotes } from '../store/NotesContext';
+import { LAYOUT_COLUMNS, useSettings } from '../store/SettingsContext';
 import type { Note } from '../store/types';
-import { radius, space, type, useTheme } from '../theme';
+import { radius, space, useTheme } from '../theme';
 import { CONTENT_MAX_WIDTH } from './layout';
 import { NoteEditor } from './NoteEditor';
+import { SettingsSheet } from './SettingsSheet';
 
 const FAB_HEIGHT = 48;
 
 export function HomeScreen() {
-  const { colors } = useTheme();
+  const { colors, type } = useTheme();
+  const { settings } = useSettings();
+  const columns = LAYOUT_COLUMNS[settings.layout];
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { hydrated, notes, pinned, others, createNote, togglePin } = useNotes();
 
   const [editing, setEditing] = useState<{ id: string; isNew: boolean } | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const openNote = useCallback((note: Note) => setEditing({ id: note.id, isNew: false }), []);
   const handleTogglePin = useCallback((note: Note) => togglePin(note.id), [togglePin]);
@@ -49,9 +55,12 @@ export function HomeScreen() {
         contentInsetAdjustmentBehavior="never"
       >
         <View style={styles.header}>
-          <Text style={[type.display, { color: colors.text }]} accessibilityRole="header">
-            Handy notes
-          </Text>
+          <View style={styles.titleRow}>
+            <Text style={[type.display, styles.title, { color: colors.text }]} accessibilityRole="header">
+              Handy notes
+            </Text>
+            <IconButton icon={SlidersHorizontal} label="Settings" onPress={() => setSettingsOpen(true)} />
+          </View>
           <Text style={[type.meta, { color: colors.textMuted }]}>{summary}</Text>
         </View>
 
@@ -60,14 +69,14 @@ export function HomeScreen() {
         {pinned.length > 0 && (
           <>
             <SectionLabel count={pinned.length}>Pinned</SectionLabel>
-            <MasonryGrid notes={pinned} width={contentWidth} onPressNote={openNote} onTogglePin={handleTogglePin} />
+            <MasonryGrid notes={pinned} width={contentWidth} columns={columns} onPressNote={openNote} onTogglePin={handleTogglePin} />
           </>
         )}
 
         {others.length > 0 && (
           <>
             {pinned.length > 0 ? <SectionLabel count={others.length}>Notes</SectionLabel> : <View style={styles.gap} />}
-            <MasonryGrid notes={others} width={contentWidth} onPressNote={openNote} onTogglePin={handleTogglePin} />
+            <MasonryGrid notes={others} width={contentWidth} columns={columns} onPressNote={openNote} onTogglePin={handleTogglePin} />
           </>
         )}
       </ScrollView>
@@ -93,6 +102,7 @@ export function HomeScreen() {
       )}
 
       <NoteEditor noteId={editing?.id ?? null} isNew={editing?.isNew ?? false} onClose={closeEditor} />
+      <SettingsSheet visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -111,6 +121,13 @@ const styles = StyleSheet.create({
     paddingBottom: space.sm,
     gap: space.sm,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.md,
+  },
+  title: { flex: 1 },
   gap: { height: space.xl },
   fab: {
     position: 'absolute',

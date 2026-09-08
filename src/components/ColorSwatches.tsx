@@ -6,6 +6,8 @@ import { NOTE_COLORS, noteColors, radius, space, type NoteColor, useTheme } from
 type Props = {
   value: NoteColor;
   onChange: (color: NoteColor) => void;
+  /** Colour of the selection ring; pass the foreground of whatever the row sits on. */
+  ringColor: string;
 };
 
 /**
@@ -13,12 +15,13 @@ type Props = {
  * the state never relies on colour alone. The ring is pre-reserved (drawn
  * transparent when idle) so selecting never shifts layout.
  */
-export function ColorSwatches({ value, onChange }: Props) {
-  const { colors, noteBg } = useTheme();
+export function ColorSwatches({ value, onChange, ringColor }: Props) {
+  const { noteTone } = useTheme();
   return (
     <View style={styles.row} accessibilityRole="radiogroup">
       {NOTE_COLORS.map((c) => {
         const selected = c === value;
+        const tone = noteTone(c);
         return (
           <Pressable
             key={c}
@@ -28,9 +31,9 @@ export function ColorSwatches({ value, onChange }: Props) {
             onPress={() => onChange(c)}
             style={({ pressed }) => [styles.bound, { opacity: pressed ? 0.7 : 1 }]}
           >
-            <View style={[styles.ring, { borderColor: selected ? colors.text : 'transparent' }]}>
-              <View style={[styles.chip, { backgroundColor: noteBg(c), borderColor: colors.hairlineOnNote }]}>
-                {selected && <Check size={14} strokeWidth={2} color={colors.text} />}
+            <View style={[styles.ring, { borderColor: selected ? ringColor : 'transparent' }]}>
+              <View style={[styles.chip, { backgroundColor: tone.bg, borderColor: tone.hairline }]}>
+                {selected && <Check size={14} strokeWidth={2} color={tone.fg} />}
               </View>
             </View>
           </Pressable>

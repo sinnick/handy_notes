@@ -4,7 +4,7 @@ import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatRelativeDay } from '../lib/date';
 import type { Note } from '../store/types';
-import { radius, space, type, useTheme } from '../theme';
+import { radius, space, useTheme } from '../theme';
 
 export const CARD_PADDING = space.lg;
 export const CARD_BODY_MAX_LINES = 8;
@@ -17,7 +17,8 @@ type Props = {
 };
 
 export const NoteCard = React.memo(function NoteCard({ note, onPress, onTogglePin }: Props) {
-  const { colors, noteBg } = useTheme();
+  const { noteTone, type } = useTheme();
+  const tone = noteTone(note.color);
   const hasTitle = note.title.trim().length > 0;
   const hasBody = note.body.trim().length > 0;
 
@@ -37,35 +38,32 @@ export const NoteCard = React.memo(function NoteCard({ note, onPress, onTogglePi
       style={({ pressed }) => [
         styles.card,
         {
-          backgroundColor: noteBg(note.color),
-          borderColor: colors.hairlineOnNote,
+          backgroundColor: tone.bg,
+          borderColor: tone.hairline,
           transform: [{ scale: pressed ? 0.98 : 1 }],
         },
       ]}
     >
       {(hasTitle || note.pinned) && (
         <View style={styles.head}>
-          <Text
-            style={[type.cardTitle, styles.title, { color: colors.text }]}
-            numberOfLines={CARD_TITLE_MAX_LINES}
-          >
+          <Text style={[type.cardTitle, styles.title, { color: tone.fg }]} numberOfLines={CARD_TITLE_MAX_LINES}>
             {hasTitle ? note.title : ''}
           </Text>
           {note.pinned && (
             <View style={styles.pin}>
-              <Pin size={14} strokeWidth={1.5} color={colors.text} fill={colors.text} />
+              <Pin size={14} strokeWidth={1.5} color={tone.fg} fill={tone.fg} />
             </View>
           )}
         </View>
       )}
       {hasBody ? (
-        <Text style={[type.cardBody, { color: colors.textSecondary }]} numberOfLines={CARD_BODY_MAX_LINES}>
+        <Text style={[type.cardBody, { color: tone.fgSecondary }]} numberOfLines={CARD_BODY_MAX_LINES}>
           {previewText(note.body)}
         </Text>
       ) : !hasTitle ? (
-        <Text style={[type.cardBody, { color: colors.textMuted }]}>Empty note</Text>
+        <Text style={[type.cardBody, { color: tone.fgMuted }]}>Empty note</Text>
       ) : null}
-      <Text style={[type.meta, styles.meta, { color: colors.textMuted }]}>{formatRelativeDay(note.updatedAt)}</Text>
+      <Text style={[type.meta, styles.meta, { color: tone.fgMuted }]}>{formatRelativeDay(note.updatedAt)}</Text>
     </Pressable>
   );
 });

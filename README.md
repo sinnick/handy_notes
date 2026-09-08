@@ -43,4 +43,4 @@ src/components/              NoteCard, MasonryGrid, ColorSwatches, SectionLabel,
 src/lib/                     id and date helpers
 ```
 
-Fonts are Geist and Geist Mono via `@expo-google-fonts`. Icons are `lucide-react-native`.
+Fonts are Rubik and DM Mono via `@expo-google-fonts`. Icons are `lucide-react-native`.

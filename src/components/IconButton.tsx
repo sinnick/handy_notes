@@ -10,6 +10,10 @@ type Props = {
   /** Draws the glyph filled, for "on" toggles like pin. */
   active?: boolean;
   tone?: 'default' | 'danger';
+  /** Override the glyph colour, e.g. when the button sits on a coloured note. */
+  color?: string;
+  /** Override the pressed/active wash, for the same reason. */
+  overlay?: string;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -17,9 +21,10 @@ type Props = {
  * 20px glyph, 1.5px stroke, in a 44px touch bound (the 32px visual bound
  * plus 6px of invisible padding on each side).
  */
-export function IconButton({ icon: Icon, label, onPress, active = false, tone = 'default', style }: Props) {
+export function IconButton({ icon: Icon, label, onPress, active = false, tone = 'default', color, overlay, style }: Props) {
   const { colors } = useTheme();
-  const color = tone === 'danger' ? colors.danger : colors.text;
+  const glyph = color ?? (tone === 'danger' ? colors.danger : colors.text);
+  const wash = overlay ?? colors.pressOverlay;
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,13 +32,9 @@ export function IconButton({ icon: Icon, label, onPress, active = false, tone = 
       accessibilityState={{ selected: active }}
       onPress={onPress}
       hitSlop={6}
-      style={({ pressed }) => [
-        styles.bound,
-        { backgroundColor: active || pressed ? colors.pressOverlay : 'transparent' },
-        style,
-      ]}
+      style={({ pressed }) => [styles.bound, { backgroundColor: active || pressed ? wash : 'transparent' }, style]}
     >
-      <Icon size={20} strokeWidth={1.5} color={color} fill={active ? color : 'none'} />
+      <Icon size={20} strokeWidth={1.5} color={glyph} fill={active ? glyph : 'none'} />
     </Pressable>
   );
 }
