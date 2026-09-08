@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Handy Notes",
+    "slug": "handy-notes",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F1EA"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sinnick.handynotes"
+    },
+    "android": {
+      "package": "com.sinnick.handynotes",
+      "adaptiveIcon": {
+        "backgroundColor": "#F5F1EA",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-font"]
+  }
+}
