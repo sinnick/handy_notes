@@ -115,14 +115,24 @@ const onDark = (bg: string, fgMuted = 'rgba(255, 255, 255, 0.72)'): NoteTone => 
   overlay: 'rgba(255, 255, 255, 0.10)',
 });
 
+/**
+ * Vivid, saturated paper. Dark text sits on every colour in both schemes;
+ * the dark-scheme values are a step deeper so they don't glare on Midnight.
+ */
+const vivid = (lightBg: string, darkBg: string) => ({
+  // Deeper red so the delete glyph keeps contrast on saturated paper.
+  light: { ...onLight(lightBg, 'rgba(2, 11, 12, 0.66)'), danger: '#7A1612' },
+  dark: { ...onLight(darkBg, 'rgba(2, 11, 12, 0.66)'), danger: '#7A1612' },
+});
+
 export const noteColors: Record<NoteColor, { label: string; light: NoteTone; dark: NoteTone }> = {
   paper: { label: 'Paper', light: onLight(brand.white), dark: onDark('#1A2430') },
-  butter: { label: 'Butter', light: onLight('#FBE58F'), dark: onDark('#4A3E0F') },
-  peach: { label: 'Peach', light: onLight('#FBC9A8'), dark: onDark('#4F2C18') },
-  mint: { label: 'Mint', light: onLight('#BDE8C8'), dark: onDark('#173D27') },
-  sky: { label: 'Sky', light: onLight('#BFDCF8'), dark: onDark('#16324F') },
-  lilac: { label: 'Lilac', light: onLight('#DACBF6'), dark: onDark('#33264F') },
-  rose: { label: 'Rose', light: onLight('#F9C5D3'), dark: onDark('#4E2233') },
+  butter: { label: 'Butter', ...vivid('#FFD23F', '#F2C230') },
+  peach: { label: 'Peach', ...vivid('#FF9B54', '#F58A3D') },
+  mint: { label: 'Mint', ...vivid('#3ED98A', '#2EC57A') },
+  sky: { label: 'Sky', ...vivid('#4DA3FF', '#3B93F5') },
+  lilac: { label: 'Lilac', ...vivid('#B49BFF', '#A28AF2') },
+  rose: { label: 'Rose', ...vivid('#FF6B8A', '#F25C7C') },
 };
 
 export type Colors = {
