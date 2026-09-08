@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { Note } from '../store/types';
-import { space, type } from '../theme';
+import { space, useTheme, type TypeScale } from '../theme';
 import { CARD_BODY_MAX_LINES, CARD_PADDING, NoteCard, previewText } from './NoteCard';
 
 const COLUMN_GAP = space.md;
@@ -10,32 +10,37 @@ type Props = {
   notes: Note[];
   /** Full width available to the grid, in px. */
   width: number;
+  /** 1 for a list, 2 or 3 for a grid. */
+  columns: number;
   onPressNote: (note: Note) => void;
   onTogglePin: (note: Note) => void;
 };
 
 /**
- * Two-column masonry. Notes are dealt greedily into whichever column is
- * currently shorter, using an estimate of each card's rendered height, so the
+ * Masonry in N columns. Notes are dealt greedily into whichever column is
+ * currently shortest, using an estimate of each card's rendered height, so the
  * columns end at roughly the same place instead of one trailing far behind.
  */
-export function MasonryGrid({ notes, width, onPressNote, onTogglePin }: Props) {
-  const columnWidth = Math.max(0, (width - COLUMN_GAP) / 2);
+export function MasonryGrid({ notes, width, columns, onPressNote, onTogglePin }: Props) {
+  const { type } = useTheme();
+  const count = Math.max(1, Math.floor(columns));
+  const columnWidth = Math.max(0, (width - COLUMN_GAP * (count - 1)) / count);
 
-  const columns = useMemo(() => {
-    const cols: [Note[], Note[]] = [[], []];
-    const heights = [0, 0];
+  const dealt = useMemo(() => {
+    const cols: Note[][] = Array.from({ length: count }, () => []);
+    const heights = new Array<number>(count).fill(0);
     for (const note of notes) {
-      const target = heights[0] <= heights[1] ? 0 : 1;
+      let target = 0;
+      for (let i = 1; i < count; i++) if (heights[i] < heights[target]) target = i;
       cols[target].push(note);
-      heights[target] += estimateCardHeight(note, columnWidth) + COLUMN_GAP;
+      heights[target] += estimateCardHeight(note, columnWidth, type) + COLUMN_GAP;
     }
     return cols;
-  }, [notes, columnWidth]);
+  }, [notes, columnWidth, count, type]);
 
   return (
     <View style={styles.row}>
-      {columns.map((col, i) => (
+      {dealt.map((col, i) => (
         <View key={i} style={styles.column}>
           {col.map((note) => (
             <NoteCard key={note.id} note={note} onPress={onPressNote} onTogglePin={onTogglePin} />
@@ -47,7 +52,7 @@ export function MasonryGrid({ notes, width, onPressNote, onTogglePin }: Props) {
 }
 
 /** Rough line-wrapping estimate; exact values come from the type scale. */
-function estimateCardHeight(note: Note, columnWidth: number): number {
+function estimateCardHeight(note: Note, columnWidth: number, type: TypeScale): number {
   const inner = Math.max(1, columnWidth - CARD_PADDING * 2);
   const titleChars = Math.max(6, Math.floor(inner / (type.cardTitle.fontSize * 0.52)));
   const bodyChars = Math.max(6, Math.floor(inner / (type.cardBody.fontSize * 0.5)));

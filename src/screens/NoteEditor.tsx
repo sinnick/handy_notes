@@ -18,7 +18,7 @@ import { IconButton } from '../components/IconButton';
 import { formatRelativeDay, formatTime } from '../lib/date';
 import { useNotes } from '../store/NotesContext';
 import { CONTENT_MAX_WIDTH } from './layout';
-import { space, type, useTheme } from '../theme';
+import { space, useTheme } from '../theme';
 
 type Props = {
   /** Id of the note being edited, or null when the editor is closed. */
@@ -56,7 +56,7 @@ function confirmDelete(onConfirm: () => void) {
 }
 
 function EditorBody({ noteId, isNew, onClose }: { noteId: string; isNew: boolean; onClose: () => void }) {
-  const { noteTone } = useTheme();
+  const { noteTone, type } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { getNote, updateNote, setColor, togglePin, deleteNote } = useNotes();

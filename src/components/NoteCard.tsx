@@ -4,7 +4,7 @@ import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { formatRelativeDay } from '../lib/date';
 import type { Note } from '../store/types';
-import { radius, space, type, useTheme } from '../theme';
+import { radius, space, useTheme } from '../theme';
 
 export const CARD_PADDING = space.lg;
 export const CARD_BODY_MAX_LINES = 8;
@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const NoteCard = React.memo(function NoteCard({ note, onPress, onTogglePin }: Props) {
-  const { noteTone } = useTheme();
+  const { noteTone, type } = useTheme();
   const tone = noteTone(note.color);
   const hasTitle = note.title.trim().length > 0;
   const hasBody = note.body.trim().length > 0;

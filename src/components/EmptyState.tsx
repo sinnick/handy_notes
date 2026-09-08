@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { space, type, useTheme } from '../theme';
+import { space, useTheme } from '../theme';
 
 export function EmptyState() {
-  const { colors } = useTheme();
+  const { colors, type } = useTheme();
   return (
     <View style={styles.wrap}>
       <Text style={[type.title, { color: colors.text }]}>Nothing at hand yet</Text>

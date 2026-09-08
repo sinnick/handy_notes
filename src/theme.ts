@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useSettings, type TextSize } from './store/SettingsContext';
 
 /**
  * Design tokens for Handy Notes.
@@ -33,7 +34,7 @@ export const fonts = {
   monoMedium: 'DMMono_500Medium',
 } as const;
 
-export const type = {
+const baseType = {
   display: { fontFamily: fonts.sans, fontSize: 36, lineHeight: 40, letterSpacing: -0.5 },
   title: { fontFamily: fonts.sansMedium, fontSize: 24, lineHeight: 30 },
   cardTitle: { fontFamily: fonts.sansMedium, fontSize: 16, lineHeight: 22 },
@@ -42,6 +43,27 @@ export const type = {
   label: { fontFamily: fonts.sansMedium, fontSize: 14, lineHeight: 20 },
   meta: { fontFamily: fonts.mono, fontSize: 12, lineHeight: 16, letterSpacing: 0.6 },
 } as const;
+
+export type TypeScale = { [K in keyof typeof baseType]: (typeof baseType)[K] & { fontSize: number; lineHeight: number } };
+
+/** Default scale, for the rare place that renders before settings exist. */
+export const type: TypeScale = baseType;
+
+const TEXT_SCALE: Record<TextSize, number> = { small: 0.9, regular: 1, large: 1.15 };
+
+function scaleType(factor: number): TypeScale {
+  const out: Record<string, unknown> = {};
+  for (const [key, style] of Object.entries(baseType)) {
+    out[key] = { ...style, fontSize: Math.round(style.fontSize * factor), lineHeight: Math.round(style.lineHeight * factor) };
+  }
+  return out as TypeScale;
+}
+
+const TYPE_BY_SIZE: Record<TextSize, TypeScale> = {
+  small: scaleType(TEXT_SCALE.small),
+  regular: baseType,
+  large: scaleType(TEXT_SCALE.large),
+};
 
 /** Brand swatches, as named in the palette. */
 export const brand = {
@@ -57,8 +79,8 @@ export const brand = {
   lightSand: '#F7F3EA',
 } as const;
 
-/** The seven tones a note can wear. Order is the order shown in the picker. */
-export const NOTE_COLORS = ['paper', 'sand', 'sky', 'glacier', 'blue', 'indigo', 'midnight'] as const;
+/** The seven colours a note can wear: vivid and clearly distinct. Order is the picker order. */
+export const NOTE_COLORS = ['paper', 'butter', 'peach', 'mint', 'sky', 'lilac', 'rose'] as const;
 export type NoteColor = (typeof NOTE_COLORS)[number];
 
 /** Everything needed to draw text and chrome on top of a note's background. */
@@ -73,10 +95,10 @@ export type NoteTone = {
   overlay: string;
 };
 
-const onLight = (bg: string, fgMuted = '#5A6472'): NoteTone => ({
+const onLight = (bg: string, fgMuted = '#5F5B53'): NoteTone => ({
   bg,
   fg: brand.midnightOcean,
-  fgSecondary: 'rgba(2, 11, 12, 0.72)',
+  fgSecondary: 'rgba(2, 11, 12, 0.74)',
   fgMuted,
   hairline: 'rgba(2, 11, 12, 0.10)',
   danger: '#C4453C',
@@ -85,22 +107,22 @@ const onLight = (bg: string, fgMuted = '#5A6472'): NoteTone => ({
 
 const onDark = (bg: string, fgMuted = 'rgba(255, 255, 255, 0.72)'): NoteTone => ({
   bg,
-  fg: brand.white,
-  fgSecondary: 'rgba(255, 255, 255, 0.86)',
+  fg: brand.warmStone,
+  fgSecondary: 'rgba(246, 245, 241, 0.80)',
   fgMuted,
-  hairline: 'rgba(255, 255, 255, 0.14)',
+  hairline: 'rgba(255, 255, 255, 0.12)',
   danger: '#FF9C93',
   overlay: 'rgba(255, 255, 255, 0.10)',
 });
 
 export const noteColors: Record<NoteColor, { label: string; light: NoteTone; dark: NoteTone }> = {
-  paper: { label: 'Paper', light: onLight(brand.white), dark: onDark('#0E1822') },
-  sand: { label: 'Sand', light: onLight('#EFE7D6'), dark: onDark('#1E1A12') },
-  sky: { label: 'Sky', light: onLight('#D7E8FA', '#425060'), dark: onDark('#0D2540') },
-  glacier: { label: 'Glacier', light: onLight(brand.glacierPale, '#3B4756'), dark: onDark('#14406B') },
-  blue: { label: 'Blue', light: onDark(brand.healthBlue, 'rgba(255, 255, 255, 0.86)'), dark: onDark('#0B5FB3', 'rgba(255, 255, 255, 0.86)') },
-  indigo: { label: 'Indigo', light: onDark(brand.deepIndigo), dark: onDark(brand.deepIndigo) },
-  midnight: { label: 'Midnight', light: onDark(brand.midnightOcean), dark: onDark('#07161C') },
+  paper: { label: 'Paper', light: onLight(brand.white), dark: onDark('#1A2430') },
+  butter: { label: 'Butter', light: onLight('#FBE58F'), dark: onDark('#4A3E0F') },
+  peach: { label: 'Peach', light: onLight('#FBC9A8'), dark: onDark('#4F2C18') },
+  mint: { label: 'Mint', light: onLight('#BDE8C8'), dark: onDark('#173D27') },
+  sky: { label: 'Sky', light: onLight('#BFDCF8'), dark: onDark('#16324F') },
+  lilac: { label: 'Lilac', light: onLight('#DACBF6'), dark: onDark('#33264F') },
+  rose: { label: 'Rose', light: onLight('#F9C5D3'), dark: onDark('#4E2233') },
 };
 
 export type Colors = {
@@ -154,8 +176,10 @@ const dark: Colors = {
 export type Scheme = 'light' | 'dark';
 
 export function useTheme() {
-  const scheme: Scheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const system = useColorScheme();
+  const { settings } = useSettings();
+  const scheme: Scheme = settings.theme === 'system' ? (system === 'dark' ? 'dark' : 'light') : settings.theme;
   const colors = scheme === 'dark' ? dark : light;
   const noteTone = (c: NoteColor): NoteTone => noteColors[c][scheme];
-  return { scheme, isDark: scheme === 'dark', colors, noteTone };
+  return { scheme, isDark: scheme === 'dark', colors, noteTone, type: TYPE_BY_SIZE[settings.textSize] };
 }

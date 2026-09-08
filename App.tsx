@@ -9,6 +9,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { NotesProvider } from './src/store/NotesContext';
+import { SettingsProvider, useSettings } from './src/store/SettingsContext';
 import { useTheme } from './src/theme';
 
 export default function App() {
@@ -21,17 +22,20 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <Root ready={fontsLoaded} />
+      <SettingsProvider>
+        <Root ready={fontsLoaded} />
+      </SettingsProvider>
     </SafeAreaProvider>
   );
 }
 
 function Root({ ready }: { ready: boolean }) {
   const { colors, isDark } = useTheme();
+  const { hydrated } = useSettings();
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      {ready && (
+      {ready && hydrated && (
         <NotesProvider>
           <HomeScreen />
         </NotesProvider>

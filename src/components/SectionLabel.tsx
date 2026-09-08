@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { space, type, useTheme } from '../theme';
+import { space, useTheme } from '../theme';
 import { DottedRule } from './DottedRule';
 
 /** Mono, tracked label followed by a dotted leader — a ledger-style section head. */
 export function SectionLabel({ children, count }: { children: string; count?: number }) {
-  const { colors } = useTheme();
+  const { colors, type } = useTheme();
   return (
     <View style={styles.row} accessibilityRole="header">
       <Text style={[type.meta, { color: colors.textMuted }]}>{children.toUpperCase()}</Text>
