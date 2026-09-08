@@ -19,7 +19,7 @@
     "android": {
       "package": "com.sinnick.handynotes",
       "adaptiveIcon": {
-        "backgroundColor": "#F7F3EA",
+        "backgroundColor": "#4DA3FF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -31,6 +31,8 @@
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-font"]
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
